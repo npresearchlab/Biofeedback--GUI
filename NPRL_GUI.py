@@ -6,7 +6,7 @@ import threading
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("theme.json")
-ArduinoSerial = serial.Serial('COM4', 9600)
+ArduinoSerial = serial.Serial('COM5', 9600)
 
 app = customtkinter.CTk()
 app.geometry("1000x700")
