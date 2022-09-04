@@ -3,6 +3,7 @@ from tkinter import *
 import customtkinter
 import serial 
 import threading
+from PIL import Image, ImageTk
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("theme.json")
@@ -41,6 +42,11 @@ entry_range = customtkinter.CTkEntry(master=frame_left, placeholder_text="Range 
 entry_range.grid(row=5, column=0, pady=10, padx=10)
 button = customtkinter.CTkButton(master=frame_left, text="Submit", command=button_event)
 button.grid(row=6, column=0, pady=10, padx=10)
+
+img = ImageTk.PhotoImage(Image.open("NPRL.png"))
+img_label = Label(frame_left, image = img, borderwidth=0)
+img_label.grid(row=8, column=0, padx=20, pady=20)
+
 
 frame_right.rowconfigure((0, 1, 2, 3), weight=1)
 frame_right.rowconfigure(7, weight=20)
