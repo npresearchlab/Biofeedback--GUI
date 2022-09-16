@@ -4,11 +4,12 @@ import customtkinter
 import serial 
 import threading
 from PIL import Image, ImageTk
+import csv
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("theme.json")
 ArduinoSerial = serial.Serial('COM3', 9600)
-
+data_saved = []
 app = customtkinter.CTk()
 app.geometry("1000x700")
 app.title("NPRL Force Sensor GUI")
@@ -32,7 +33,6 @@ target = 0.1
 target_range = 0.1
 def button_event():
     global target, target_range
-    print("click")
     target = float(entry_target.get())
     target_range = float(entry_range.get())
 label_left.grid(row=1, column=0, pady=10, padx=10)
@@ -45,8 +45,7 @@ button.grid(row=6, column=0, pady=10, padx=10)
 
 img = ImageTk.PhotoImage(Image.open("NPRL.png"))
 img_label = Label(frame_left, image = img, borderwidth=0)
-img_label.grid(row=8, column=0, padx=20, pady=20)
-
+img_label.grid(row=8, column=0, padx=30, pady=30)
 
 frame_right.rowconfigure((0, 1, 2, 3), weight=1)
 frame_right.rowconfigure(7, weight=20)
@@ -59,7 +58,6 @@ frame_info.rowconfigure(0, weight=1)
 frame_info.columnconfigure(0, weight=1)
 progressbar = customtkinter.CTkProgressBar(master=frame_info)
 progressbar.grid(row=2, column=0, sticky="ew", padx=15, pady=15)
-progressbar.configure(progress_color='#e3141f')
 
 label_info_1 = customtkinter.CTkLabel(master=frame_info,
                                       text="NPRL Force Sensor Output",
@@ -72,8 +70,15 @@ displayLab = Label(frame_info, textvariable=displayVar, background='#333333', fg
 displayLab.grid(column=0, row=1, sticky="we", padx=5, pady=5)
 progressbar.set(0)
 
+def switch_event():
+    print('click')
+
+switch = customtkinter.CTkSwitch(frame_left, text="Calibration", command=switch_event)
+switch.grid(row=7, column=0, padx=20, pady=10)
+switch.select()
 def arduino_handler():
     global current_progress
+    global data_saved
     while True:
         data = ArduinoSerial.readline().decode('utf-8').strip()
         print(data)
@@ -82,13 +87,22 @@ def arduino_handler():
             progressbar.set(current_progress)
         target_subtact = target - target_range
         target_add = target + target_range
-        #print(target_subtact)
-        #print(target_add)
-        if target_subtact < current_progress < target_add:
-            progressbar.configure(progress_color='#2bf09e')
+        if not switch.get():
+            if target_subtact < current_progress < target_add:
+                progressbar.configure(progress_color='#2bf09e')
+            else:
+                progressbar.configure(progress_color='#e3141f')
         else:
-            progressbar.configure(progress_color='#e3141f')
+            progressbar.configure(progress_color='#0362fc')
         displayVar.set(str(abs(current_progress)))
+        data_saved.append(current_progress)
+        print(data_saved)
+        header = ['Force Exerted']
+        with open('data_files/current_data.csv', 'w') as f:
+            writer = csv.writer(f, lineterminator='\n')
+            writer.writerow(header)
+            for val in data_saved:
+                writer.writerow([val])
 
 threading.Thread(target=arduino_handler, daemon=True).start()
 app.mainloop()
