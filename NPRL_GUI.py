@@ -16,6 +16,8 @@ app.title("NPRL Force Sensor GUI")
 current_progress = 0
 target = 0
 displayVar = StringVar()
+maxValueStr = StringVar()
+maxValueStr.set("Max Value")
 displayVar.set("Current Progress: ")
 app.grid_columnconfigure(1, weight=1)
 app.grid_rowconfigure(0, weight=1)
@@ -68,23 +70,28 @@ label_info_1 = customtkinter.CTkLabel(master=frame_info,
 label_info_1.grid(column=0, row=0, sticky="we", padx=5, pady=5)
 displayLab = Label(frame_info, textvariable=displayVar, background='#333333', fg="white")
 displayLab.grid(column=0, row=1, sticky="we", padx=5, pady=5)
+maxValueLab = Label(frame_info, textvariable=maxValueStr, background='#333333', fg="white")
+maxValueLab.grid(column=0, row=3, sticky="we", padx=5, pady=5)
 progressbar.set(0)
-
-def switch_event():
-    print('click')
-
-switch = customtkinter.CTkSwitch(frame_left, text="Calibration", command=switch_event)
+switch = customtkinter.CTkSwitch(frame_left, text="Calibration")
 switch.grid(row=7, column=0, padx=20, pady=10)
 switch.select()
+max_force = -999
 def arduino_handler():
     global current_progress
     global data_saved
+    global max_force
     while True:
         data = ArduinoSerial.readline().decode('utf-8').strip()
         print(data)
         current_progress = float(data)
+        if switch.get():
+            if current_progress > max_force:
+                max_force = current_progress
+                maxValueStr.set(max_force)
         if 0 <= current_progress < 1:
-            progressbar.set(current_progress)
+            if not max_force == 0:
+                progressbar.set(current_progress/max_force)
         target_subtact = target - target_range
         target_add = target + target_range
         if not switch.get():
