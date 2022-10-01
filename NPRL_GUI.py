@@ -81,16 +81,16 @@ switch.grid(row=7, column=0, padx=20, pady=10)
 switch.deselect()
 max_force = -999
 
-# def countdown(time_sec, progress, ):
-#     while time_sec:
-#         mins, secs = divmod(time_sec, 60)
-#         timeformat = '{:02d}:{:02d}'.format(mins, secs)
-#         print(timeformat, end='\r')
-#         time.sleep(1)
-#         time_sec -= 1
 
-#     print("stop")
-
+def turn_green():
+    print("green")
+    ArduinoSerial.write(b'x')
+def turn_blue():
+    print("blue")
+    ArduinoSerial.write(b'z')
+def turn_red():
+    print("red")
+    ArduinoSerial.write(b'v')
 def arduino_handler():
     global current_progress
     global data_saved
@@ -118,7 +118,8 @@ def arduino_handler():
                     maxValueStr.set(max_force)
                     if not max_force == 0:
                         progressbar.set(current_progress/max_force)
-                        progressbar.configure(progress_color='#0362fc')
+                        progressbar.configure(progress_color='#0362fc', height=15)
+                        turn_blue()
             switch.deselect()
         if 0 <= current_progress < 1:
             print("Max Force", max_force)
@@ -130,9 +131,11 @@ def arduino_handler():
             data = ArduinoSerial.readline().decode('utf-8').strip()
             current_progress = float(data)
             if target_subtact < current_progress < target_add:
-                progressbar.configure(progress_color='#2bf09e')
+                progressbar.configure(progress_color='#2bf09e', height=15)
+                turn_green()
             else:
-                progressbar.configure(progress_color='#e3141f')
+                progressbar.configure(progress_color='#e3141f', height=15)
+                turn_red()
         else:
             progressbar.configure(progress_color='#0362fc')
         data_saved.append(current_progress)
