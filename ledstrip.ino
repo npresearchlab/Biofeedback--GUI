@@ -33,22 +33,22 @@ void loop() {
    userInput = Serial.read();               // read user input
       if(userInput == 'o'){                
         color = strip.Color(255, 0, 255);
-        strip.fill(color, 1, 30);
+        strip.fill(color, 0, 30);
     strip.show();
       }
       if(userInput == 'x'){
         color = strip.Color(0, 150, 0);
-        strip.fill(color, 1, 30);
+        strip.fill(color, 0, 30);
     strip.show();
       }
       if(userInput == 'z'){
         color = strip.Color(27, 49, 247);
-        strip.fill(color, 1, 30);
+        strip.fill(color, 0, 30);
     strip.show();
       }
       if(userInput == 'v'){
         color = strip.Color(242, 21, 10);
-        strip.fill(color, 1, 30);
+        strip.fill(color, 0, 30);
     strip.show();
       }
       if(userInput == 'c'){
