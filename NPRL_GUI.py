@@ -127,6 +127,8 @@ def arduino_handler():
         target_subtact = target - target_range
         target_add = target + target_range
         if not switch.get():
+            data = ArduinoSerial.readline().decode('utf-8').strip()
+            current_progress = float(data)
             if target_subtact < current_progress < target_add:
                 progressbar.configure(progress_color='#2bf09e')
             else:
