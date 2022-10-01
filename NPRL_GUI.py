@@ -1,10 +1,13 @@
 import tkinter
+import asyncio
 from tkinter import *
 import customtkinter
 import serial 
 import threading
 from PIL import Image, ImageTk
 import csv
+import time
+
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("theme.json")
@@ -75,21 +78,50 @@ maxValueLab.grid(column=0, row=3, sticky="we", padx=5, pady=5)
 progressbar.set(0)
 switch = customtkinter.CTkSwitch(frame_left, text="Calibration")
 switch.grid(row=7, column=0, padx=20, pady=10)
-switch.select()
+switch.deselect()
 max_force = -999
+
+# def countdown(time_sec, progress, ):
+#     while time_sec:
+#         mins, secs = divmod(time_sec, 60)
+#         timeformat = '{:02d}:{:02d}'.format(mins, secs)
+#         print(timeformat, end='\r')
+#         time.sleep(1)
+#         time_sec -= 1
+
+#     print("stop")
+
 def arduino_handler():
     global current_progress
     global data_saved
     global max_force
+    global maxValueStr
     while True:
         data = ArduinoSerial.readline().decode('utf-8').strip()
         print(data)
         current_progress = float(data)
+        displayVar.set(str(abs(current_progress)))
         if switch.get():
-            if current_progress > max_force:
-                max_force = current_progress
-                maxValueStr.set(max_force)
+            print("Time: " + str(time.time()))
+            # print("End Time: " + str(end_time))
+            curr_time = time.time()
+            target_time = curr_time + 5
+            while curr_time < target_time:
+                curr_time = time.time()
+                data = ArduinoSerial.readline().decode('utf-8').strip()
+                print("Current Progress Data: ", data)
+                current_progress = float(data)
+                print("Updating Current Progress", current_progress)
+                if current_progress > max_force:
+                    print("Updating Max Force: ", max_force)
+                    max_force = current_progress
+                    maxValueStr.set(max_force)
+                    if not max_force == 0:
+                        progressbar.set(current_progress/max_force)
+                        progressbar.configure(progress_color='#0362fc')
+            switch.deselect()
         if 0 <= current_progress < 1:
+            print("Max Force", max_force)
             if not max_force == 0:
                 progressbar.set(current_progress/max_force)
         target_subtact = target - target_range
@@ -101,9 +133,7 @@ def arduino_handler():
                 progressbar.configure(progress_color='#e3141f')
         else:
             progressbar.configure(progress_color='#0362fc')
-        displayVar.set(str(abs(current_progress)))
         data_saved.append(current_progress)
-        print(data_saved)
         header = ['Force Exerted']
         with open('data_files/current_data.csv', 'w') as f:
             writer = csv.writer(f, lineterminator='\n')
