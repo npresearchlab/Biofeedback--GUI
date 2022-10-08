@@ -17,10 +17,11 @@ app = customtkinter.CTk()
 app.geometry("1000x700")
 app.title("NPRL Force Sensor GUI")
 current_progress = 0
-target = 0
 displayVar = StringVar()
 maxValueStr = StringVar()
+targetStr = StringVar()
 maxValueStr.set("Max Value")
+targetStr.set("Target: ")
 displayVar.set("Current Progress: ")
 app.grid_columnconfigure(1, weight=1)
 app.grid_rowconfigure(0, weight=1)
@@ -34,8 +35,8 @@ frame_right.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
 label_left = customtkinter.CTkLabel(master=frame_left,
                                     text="NPRL Force Sensor GUI",
                                     text_font=("Roboto Medium", -16))
-target = 0.1
-target_range = 0.1
+target = 1
+target_range = 0.01
 def button_event():
     global target, target_range
     target = float(entry_target.get())
@@ -50,7 +51,7 @@ button.grid(row=6, column=0, pady=10, padx=10)
 
 img = ImageTk.PhotoImage(Image.open("NPRL.png"))
 img_label = Label(frame_left, image = img, borderwidth=0)
-img_label.grid(row=8, column=0, padx=30, pady=30)
+img_label.grid(row=12, column=0, padx=30, pady=30)
 
 frame_right.rowconfigure((0, 1, 2, 3), weight=1)
 frame_right.rowconfigure(7, weight=20)
@@ -75,6 +76,9 @@ displayLab = Label(frame_info, textvariable=displayVar, background='#333333', fg
 displayLab.grid(column=0, row=1, sticky="we", padx=5, pady=5)
 maxValueLab = Label(frame_info, textvariable=maxValueStr, background='#333333', fg="white")
 maxValueLab.grid(column=0, row=3, sticky="we", padx=5, pady=5)
+targetLab = Label(frame_left, textvariable=targetStr, background='#333333', fg="white")
+targetLab.grid(column=0, row=8, sticky="we", padx=5, pady=5)
+
 progressbar.set(0)
 progressbar.configure(height=15)
 switch = customtkinter.CTkSwitch(frame_left, text="Calibration")
@@ -97,6 +101,7 @@ def arduino_handler():
     global data_saved
     global max_force
     global maxValueStr
+    global target, target_range
     while True:
         data = ArduinoSerial.readline().decode('utf-8').strip()
         print(data)
@@ -117,6 +122,9 @@ def arduino_handler():
                     print("Updating Max Force: ", max_force)
                     max_force = current_progress
                     maxValueStr.set(max_force)
+                    target = max_force * 0.15
+                    print("Target: " + str(target))
+                    targetStr.set(target)
                     if not max_force == 0:
                         progressbar.set(current_progress/max_force)
                         progressbar.configure(progress_color='#0362fc', height=15)
