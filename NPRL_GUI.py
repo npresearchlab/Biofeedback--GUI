@@ -1,5 +1,4 @@
 import tkinter
-import asyncio
 from tkinter import *
 import customtkinter
 import serial 
@@ -41,6 +40,7 @@ def button_event():
     global target, target_range
     target = float(entry_target.get())
     target_range = float(entry_range.get())
+    targetStr.set("Target: " + str(target))
 label_left.grid(row=1, column=0, pady=10, padx=10)
 entry_target = customtkinter.CTkEntry(master=frame_left, placeholder_text="Target")
 entry_target.grid(row=4, column=0, pady=10, padx=10)
@@ -76,7 +76,7 @@ displayLab = Label(frame_info, textvariable=displayVar, background='#333333', fg
 displayLab.grid(column=0, row=1, sticky="we", padx=5, pady=5)
 maxValueLab = Label(frame_info, textvariable=maxValueStr, background='#333333', fg="white")
 maxValueLab.grid(column=0, row=3, sticky="we", padx=5, pady=5)
-targetLab = Label(frame_left, textvariable=targetStr, background='#333333', fg="white")
+targetLab = Label(frame_left, textvariable=targetStr, background='#2c2c24', fg="white")
 targetLab.grid(column=0, row=8, sticky="we", padx=5, pady=5)
 
 progressbar.set(0)
@@ -106,7 +106,7 @@ def arduino_handler():
         data = ArduinoSerial.readline().decode('utf-8').strip()
         print(data)
         current_progress = float(data)
-        displayVar.set(str(abs(current_progress)))
+        displayVar.set("Current Progress: " + str(abs(current_progress)))
         if switch.get():
             print("Time: " + str(time.time()))
             # print("End Time: " + str(end_time))
@@ -121,10 +121,10 @@ def arduino_handler():
                 if current_progress > max_force:
                     print("Updating Max Force: ", max_force)
                     max_force = current_progress
-                    maxValueStr.set(max_force)
+                    maxValueStr.set("Max Force: " + str(max_force))
                     target = max_force * 0.15
                     print("Target: " + str(target))
-                    targetStr.set(target)
+                    targetStr.set("Target: " + str(target))
                     if not max_force == 0:
                         progressbar.set(current_progress/max_force)
                         progressbar.configure(progress_color='#0362fc', height=15)
@@ -139,7 +139,7 @@ def arduino_handler():
         if not switch.get():
             data = ArduinoSerial.readline().decode('utf-8').strip()
             current_progress = float(data)
-            displayVar.set(str(abs(current_progress)))
+            displayVar.set("Current Progress: " + str(abs(current_progress)))
             if target_subtact < current_progress < target_add:
                 progressbar.configure(progress_color='#2bf09e', height=15)
                 turn_green()
