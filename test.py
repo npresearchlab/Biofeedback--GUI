@@ -66,20 +66,23 @@ import json
 # my data rows as dictionary objects
 # mydict =[{'current progress': 0.0, 'max force': 0.2, 'average max force': 0.1}, 
 # {'current progress': 0.0, 'max force': 0.2, 'average max force': 0.1}]
-def add_element(dict, value):
-    dict.append(value)
+def add_element(list, curr, max, average):
+    mydict = {}
+    mydict['current progress'] = curr
+    mydict['max force'] = max
+    mydict['average max force'] = average
+    list.append(mydict)
 
-mydict = {}
-add_element(mydict,  {'current progress' : 0})
-add_element(mydict ,{'max force' : 0})
-add_element(mydict, {'average max force' : 0})
+mylist = []
+
+add_element(mylist, 0, 0, 0)
 
 # field names
 fields = ['current progress', 'max force', 'average max force']
 	
 # name of csv file
 filename = "test.csv"
-print(mydict)
+print(mylist)
 # writing to csv file
 with open(filename, 'w') as csvfile:
 	# creating a csv dict writer object
@@ -89,4 +92,4 @@ with open(filename, 'w') as csvfile:
 	writer.writeheader()
 		
 	# writing data rows
-	writer.writerows(mydict)
+	writer.writerows(mylist)

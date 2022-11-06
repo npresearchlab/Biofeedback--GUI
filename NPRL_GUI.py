@@ -95,7 +95,7 @@ max_force = 0
 max_force_arr = []
 i = 0
 csvlist = []
-
+max_force_not_average = 0
 def turn_green():
     print("green")
     ArduinoSerial.write(b'x')
@@ -118,6 +118,7 @@ def arduino_handler():
     global average_saved
     global max_force
     global max_force_arr
+    global max_force_not_average
     global i
     global maxValueStr
     global csvlist
@@ -154,6 +155,7 @@ def arduino_handler():
             switch.deselect()
             for x in max_force_arr:
                     max_force += x
+            max_force_not_average = max_force_arr[i]
             # max_force_saved.append(max_force_arr[i])
             i+=1
             max_force /= i
@@ -180,18 +182,13 @@ def arduino_handler():
             progressbar.configure(progress_color='#0362fc')
         # data_saved.append(current_progress)
         # average_saved.append(max_force)
-        add_element(csvlist, 0, 0, 0)
+        add_element(csvlist, current_progress, max_force_not_average, max_force)
         header = ['Force Exerted', 'Max Forces', 'Average Max Force']
         with open('data_files/current_data.csv', 'w') as f:
             writer = csv.DictWriter(f, fieldnames = header)
             writer.writeheader()
             writer.writerows(csvlist)
-            # for val in data_saved:
-            #     writer.writerow([val])
-            # for val in max_force_saved:
-            #     writer.writerow([val])
-            # for val in average_saved:
-            #     writer.writerow([val])
+
 
 threading.Thread(target=arduino_handler, daemon=True).start()
 app.mainloop()
