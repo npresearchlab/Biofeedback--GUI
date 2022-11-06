@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 import csv
 import time
 
-time.sleep(1)
+time.sleep(2)
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("theme.json")
 ArduinoSerial = serial.Serial('COM3', 9600)
@@ -94,7 +94,7 @@ switch.deselect()
 max_force = 0
 max_force_arr = []
 i = 0
-csvdict = {}
+csvlist = []
 
 def turn_green():
     print("green")
@@ -105,6 +105,12 @@ def turn_blue():
 def turn_red():
     print("red")
     ArduinoSerial.write(b'v')
+def add_element(list, curr, max, average):
+    mydict = {}
+    mydict['Force Exerted'] = curr
+    mydict['Max Forces'] = max
+    mydict['Average Max Force'] = average
+    list.append(mydict)
 def arduino_handler():
     global current_progress
     global data_saved
@@ -114,7 +120,7 @@ def arduino_handler():
     global max_force_arr
     global i
     global maxValueStr
-    global csvdict
+    global csvlist
     global target, target_range
     while True:
         data = ArduinoSerial.readline().decode('utf-8').strip()
@@ -149,7 +155,6 @@ def arduino_handler():
             for x in max_force_arr:
                     max_force += x
             # max_force_saved.append(max_force_arr[i])
-            csvdict["max force"] = max_force_arr[i]
             i+=1
             max_force /= i
             print("Updating Max Force: ", max_force)
@@ -175,13 +180,12 @@ def arduino_handler():
             progressbar.configure(progress_color='#0362fc')
         # data_saved.append(current_progress)
         # average_saved.append(max_force)
-        csvdict["current progress"] = current_progress
-        csvdict["average max force"] = max_force
+        add_element(csvlist, 0, 0, 0)
         header = ['Force Exerted', 'Max Forces', 'Average Max Force']
         with open('data_files/current_data.csv', 'w') as f:
             writer = csv.DictWriter(f, fieldnames = header)
             writer.writeheader()
-            writer.writerows(csvdict)
+            writer.writerows(csvlist)
             # for val in data_saved:
             #     writer.writerow([val])
             # for val in max_force_saved:
