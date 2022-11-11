@@ -6,8 +6,8 @@ import threading
 from PIL import Image, ImageTk
 import csv
 import time
+from datetime import datetime
 
-time.sleep(2)
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("theme.json")
 ArduinoSerial = serial.Serial('COM3', 9600)
@@ -85,7 +85,6 @@ targetLab.grid(column=0, row=8, sticky="we", padx=5, pady=5)
 countLab = Label(frame_left, textvariable=countStr, background='#2c2c24', fg="white")
 countLab.grid(column=0, row=9, sticky="we", padx=5, pady=5)
 
-
 progressbar.set(0)
 progressbar.configure(height=35)
 switch = customtkinter.CTkSwitch(frame_left, text="Calibration")
@@ -105,11 +104,13 @@ def turn_blue():
 def turn_red():
     print("red")
     ArduinoSerial.write(b'v')
-def add_element(list, curr, max, average):
+def add_element(list, time, curr, max, average, trials):
     mydict = {}
+    mydict['Current Time'] = time
     mydict['Force Exerted'] = curr
     mydict['Max Forces'] = max
     mydict['Average Max Force'] = average
+    mydict['Number of Trials'] = trials
     list.append(mydict)
 def arduino_handler():
     global current_progress
@@ -121,11 +122,13 @@ def arduino_handler():
     global max_force_not_average
     global i
     global maxValueStr
+    global current_time
     global csvlist
     global target, target_range
     while True:
         data = ArduinoSerial.readline().decode('utf-8').strip()
         print(data)
+        current_time = datetime.now()
         current_progress = float(data)
         displayVar.set("Current Progress: " + str(abs(current_progress)))
         countStr.set("Current Count: " + str(i))
@@ -140,10 +143,12 @@ def arduino_handler():
                 print("Current Progress Data: ", data)
                 current_progress = float(data)
                 print("Updating Current Progress", current_progress)
+                displayVar.set("Current Progress: " + str(abs(current_progress)))
                 if current_progress > max_force_arr[i]:
                     # print("Updating Max Force: ", max_force)
                     # print("Max Force Array", max_force_arr)
                     max_force_arr[i] = current_progress
+                    max_force_not_average = max_force_arr[i]
                     # maxValueStr.set("Max Force: " + str(max_force))
                     target = max_force_arr[i] * 0.15
                     print("Target: " + str(target))
@@ -155,10 +160,10 @@ def arduino_handler():
             switch.deselect()
             for x in max_force_arr:
                     max_force += x
-            max_force_not_average = max_force_arr[i]
             # max_force_saved.append(max_force_arr[i])
             i+=1
             max_force /= i
+            print("max_force_not_average: ", max_force_not_average)
             print("Updating Max Force: ", max_force)
             print("Max Force Array", max_force_arr)
             maxValueStr.set("Average Max Force: " + str(max_force))
@@ -182,8 +187,8 @@ def arduino_handler():
             progressbar.configure(progress_color='#0362fc')
         # data_saved.append(current_progress)
         # average_saved.append(max_force)
-        add_element(csvlist, current_progress, max_force_not_average, max_force)
-        header = ['Force Exerted', 'Max Forces', 'Average Max Force']
+        add_element(csvlist, current_time, current_progress, max_force_not_average, max_force, i)
+        header = ['Current Time', 'Force Exerted', 'Max Forces', 'Average Max Force', 'Number of Trials']
         with open('data_files/current_data.csv', 'w') as f:
             writer = csv.DictWriter(f, fieldnames = header)
             writer.writeheader()
