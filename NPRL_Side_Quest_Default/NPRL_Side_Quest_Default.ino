@@ -42,7 +42,7 @@ HX711 scale;
 char userInput;
 uint32_t color = strip.Color(0, 150, 0);
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(112500);
   // Serial.println("HX711 scale demo");
   strip.begin();
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
