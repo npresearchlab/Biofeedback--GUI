@@ -42,7 +42,7 @@ HX711 scale;
 char userInput;
 uint32_t color = strip.Color(0, 150, 0);
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(112500);
   // Serial.println("HX711 scale demo");
   strip.begin();
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
@@ -54,7 +54,7 @@ void setup() {
 
 void loop() {
   // Serial.print("Reading: ");
-  Serial.println(abs(scale.get_units())/22.0462); //we divide by 22.0462 as the physical load cell is rated for 10 kg of force detection- allows us to output a precentage directly to python
+  Serial.println(abs(scale.get_units())); //we divide by 22.0462 as the physical load cell is rated for 10 kg of force detection- allows us to output a precentage directly to python
   strip.clear();
   // put your main code here, to run repeatedly:
    userInput = Serial.read();               // read user input
