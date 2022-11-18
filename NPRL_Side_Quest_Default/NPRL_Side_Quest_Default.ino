@@ -54,7 +54,7 @@ void setup() {
 
 void loop() {
   // Serial.print("Reading: ");
-  Serial.println(abs(scale.get_units())); //we divide by 22.0462 as the physical load cell is rated for 10 kg of force detection- allows us to output a precentage directly to python
+  Serial.println(abs(scale.get_units()/22.0462)); //we divide by 22.0462 as the physical load cell is rated for 10 kg of force detection- allows us to output a precentage directly to python
   strip.clear();
   // put your main code here, to run repeatedly:
    userInput = Serial.read();               // read user input

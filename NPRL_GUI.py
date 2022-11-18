@@ -10,7 +10,7 @@ from datetime import datetime
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("theme.json")
-ArduinoSerial = serial.Serial('COM3', 112500)
+ArduinoSerial = serial.Serial('COM4', 112500)
 data_saved = []
 max_force_saved = []
 average_saved = []
@@ -39,7 +39,7 @@ label_left = customtkinter.CTkLabel(master=frame_left,
                                     text="NPRL Force Sensor GUI",
                                     text_font=("Roboto Medium", -16))
 target = 1
-target_range = 2
+target_range = 1
 find_target_percent = 0.15
 def button_event(): #entering target, target range, target percent in GUI
     global target, target_range, find_target_percent
@@ -140,7 +140,7 @@ def arduino_handler():
         displayVar.set("Current Progress: " + str(abs(round(current_progress*22.0462, 3)))) # current_progress*22.0462
         countStr.set("Current Count: " + str(i))
         if i == 0:
-            progressbar.set(current_progress/0.75)
+            progressbar.set(current_progress/0.25)
         if switch.get():
             progressbar.configure(progress_color='#0362fc', height=35)
             print("Time: " + str(time.time()))
@@ -150,7 +150,7 @@ def arduino_handler():
             while curr_time < target_time:
                 curr_time = time.time()
                 data = ArduinoSerial.readline().decode('utf-8').strip()
-                progressbar.set(current_progress/0.75)
+                progressbar.set(current_progress/0.25)
                 print("Current Progress Data: ", data)
                 current_progress = float(data)
                 print("Updating Current Progress", current_progress)
@@ -165,7 +165,7 @@ def arduino_handler():
                     print("Target: " + str(target)) # target*22.0462
                     targetStr.set("Target: " + str(abs(round(target*22.0462, 3))))
                     if not max_force == 0:
-                        progressbar.set(current_progress/0.75)
+                        progressbar.set(current_progress/0.25)
                         progressbar.configure(progress_color='#0362fc', height=35)
                         turn_blue()
             switch.deselect()
@@ -181,7 +181,7 @@ def arduino_handler():
         if 0 <= current_progress < 1:
             print("Max Force", max_force)
             if not max_force == 0:
-                progressbar.set(current_progress/0.75)
+                progressbar.set(current_progress/0.25)
         target_subtact = target*22.0462 - target_range
         target_add = target*22.0462 + target_range
         if not switch.get():
