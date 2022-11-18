@@ -46,7 +46,7 @@ def button_event(): #entering target, target range, target percent in GUI
     target = float(entry_target.get())
     target_range = float(entry_range.get())
     find_target_percent = float(entry_percent.get())
-    targetStr.set("Target: " + str(target))
+    targetStr.set("Target: " + str(abs(round(target, 3))))
 label_left.grid(row=1, column=0, pady=10, padx=10)
 entry_target = customtkinter.CTkEntry(master=frame_left, placeholder_text="Target")
 entry_target.grid(row=4, column=0, pady=10, padx=10)
@@ -137,10 +137,10 @@ def arduino_handler():
         print(data)
         current_time = datetime.now()
         current_progress = float(data)
-        displayVar.set("Current Progress: " + str(abs(current_progress*22.0462))) # current_progress*22.0462
+        displayVar.set("Current Progress: " + str(abs(round(current_progress*22.0462, 3)))) # current_progress*22.0462
         countStr.set("Current Count: " + str(i))
         if i == 0:
-            progressbar.set(current_progress)
+            progressbar.set(current_progress/0.75)
         if switch.get():
             progressbar.configure(progress_color='#0362fc', height=35)
             print("Time: " + str(time.time()))
@@ -154,7 +154,7 @@ def arduino_handler():
                 print("Current Progress Data: ", data)
                 current_progress = float(data)
                 print("Updating Current Progress", current_progress)
-                displayVar.set("Current Progress: " + str(abs(current_progress*22.0462))) # current_progress*22.0462
+                displayVar.set("Current Progress: " + str(abs(round(current_progress*22.0462, 3)))) # current_progress*22.0462
                 if current_progress > max_force_arr[i]:
                     current_progress = float(data)
                     max_force_arr[i] = current_progress
@@ -163,9 +163,9 @@ def arduino_handler():
                     target = max_force_arr[i] * find_target_percent
                     print("Finding Percent: " + str(find_target_percent))
                     print("Target: " + str(target)) # target*22.0462
-                    targetStr.set("Target: " + str(target*22.0462))
+                    targetStr.set("Target: " + str(abs(round(target*22.0462, 3))))
                     if not max_force == 0:
-                        progressbar.set(current_progress)
+                        progressbar.set(current_progress/0.75)
                         progressbar.configure(progress_color='#0362fc', height=35)
                         turn_blue()
             switch.deselect()
@@ -177,17 +177,17 @@ def arduino_handler():
             print("max_force_not_average: ", max_force_not_average)
             print("Updating Max Force: ", max_force)
             print("Max Force Array", max_force_arr)
-            maxValueStr.set("Average Max Force: " + str(max_force*22.0462)) #max_force*22.0462
+            maxValueStr.set("Average Max Force: " + str(abs(round(max_force*22.0462, 3)))) #max_force*22.0462
         if 0 <= current_progress < 1:
             print("Max Force", max_force)
             if not max_force == 0:
-                progressbar.set(current_progress)
+                progressbar.set(current_progress/0.75)
         target_subtact = target*22.0462 - target_range
         target_add = target*22.0462 + target_range
         if not switch.get():
             data = ArduinoSerial.readline().decode('utf-8').strip()
             current_progress = float(data)
-            displayVar.set("Current Progress: " + str(abs(current_progress))) #current_progress*22.0462
+            displayVar.set("Current Progress: " + str(abs(round(current_progress*22.0462, 3)))) #current_progress*22.0462
             if target_subtact < current_progress*22.0462 < target_add:
                 progressbar.configure(progress_color='#2bf09e', height=35)
                 turn_green()
@@ -198,7 +198,7 @@ def arduino_handler():
             progressbar.configure(progress_color='#0362fc')
         # data_saved.append(current_progress)
         # average_saved.append(max_force)
-        add_element(csvlist, current_time, current_progress*22.0462, max_force_not_average*22.0462, max_force*22.0462, i, target*22.0462, target_range)
+        add_element(csvlist, current_time, round(current_progress*22.0462, 3), round(max_force_not_average*22.0462, 3), round(max_force*22.0462, 3), i, round(target*22.0462, 3), target_range)
         header = ['Current Time', 'Force Exerted', 'Target', 'Target Range', 'Max Forces', 'Average Max Force', 'Number of Trials']
         with open('data_files/current_data.csv', 'w') as f:
             writer = csv.DictWriter(f, fieldnames = header)
