@@ -10,7 +10,7 @@ from datetime import datetime
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("theme.json")
-ArduinoSerial = serial.Serial('COM4', 112500)
+ArduinoSerial = serial.Serial('COM3', 112500)
 data_saved = []
 max_force_saved = []
 average_saved = []
@@ -22,10 +22,12 @@ displayVar = StringVar()
 maxValueStr = StringVar()
 targetStr = StringVar()
 countStr = StringVar()
+rangeStr = StringVar()
 maxValueStr.set("Max Value")
 targetStr.set("Target: ")
 displayVar.set("Current Progress: ")
 countStr.set("Current Count: ")
+rangeStr.set("Target Range: ")
 app.grid_columnconfigure(1, weight=1)
 app.grid_rowconfigure(0, weight=1)
 frame_left = customtkinter.CTkFrame(master=app,
@@ -39,14 +41,14 @@ label_left = customtkinter.CTkLabel(master=frame_left,
                                     text="NPRL Force Sensor GUI",
                                     text_font=("Roboto Medium", -16))
 target = 1
-target_range = 1
+target_range = target*0.50
 find_target_percent = 0.15
 def button_event(): #entering target, target range, target percent in GUI
     global target, target_range, find_target_percent
-    target = float(entry_target.get())
+    target = float(entry_target.get())/22.0462
     target_range = float(entry_range.get())
     find_target_percent = float(entry_percent.get())
-    targetStr.set("Target: " + str(abs(round(target, 3))))
+    targetStr.set("Target: " + str(abs(round(target*22.0462, 3))))
 label_left.grid(row=1, column=0, pady=10, padx=10)
 entry_target = customtkinter.CTkEntry(master=frame_left, placeholder_text="Target")
 entry_target.grid(row=4, column=0, pady=10, padx=10)
@@ -88,6 +90,8 @@ targetLab = Label(frame_left, textvariable=targetStr, background='#2c2c24', fg="
 targetLab.grid(column=0, row=9, sticky="we", padx=5, pady=5)
 countLab = Label(frame_left, textvariable=countStr, background='#2c2c24', fg="white")
 countLab.grid(column=0, row=10, sticky="we", padx=5, pady=5)
+rangeLab = Label(frame_left, textvariable=rangeStr, background='#2c2c24', fg="white")
+rangeLab.grid(column=0, row=11, sticky="we", padx=5, pady=5)
 
 progressbar.set(0)
 progressbar.configure(height=35)
@@ -147,6 +151,7 @@ def arduino_handler():
             curr_time = time.time()
             target_time = curr_time + 5
             max_force_arr.append(0.0)
+            add_element(csvlist, current_time, round(current_progress*22.0462, 3), round(max_force_not_average*22.0462, 3), round(max_force*22.0462, 3), i, round(target*22.0462, 3), target_range)
             while curr_time < target_time:
                 curr_time = time.time()
                 data = ArduinoSerial.readline().decode('utf-8').strip()
@@ -164,22 +169,30 @@ def arduino_handler():
                     print("Finding Percent: " + str(find_target_percent))
                     print("Target: " + str(target)) # target*22.0462
                     targetStr.set("Target: " + str(abs(round(target*22.0462, 3))))
+                    target_range = target*22.0462*0.50
+                    rangeStr.set("Target Range: " + str(abs(round(target_range, 3))))
                     if not max_force == 0:
                         progressbar.set(current_progress/0.25)
                         progressbar.configure(progress_color='#0362fc', height=35)
                         turn_blue()
-            switch.deselect()
+            max_force = 0
             for x in max_force_arr:
-                    max_force += x
+                max_force += x
+                print("X", x)
             # max_force_saved.append(max_force_arr[i])
             i+=1
+            print("BEFORE: ",float(max_force)*22.0462)
             max_force /= i
-            print("max_force_not_average: ", max_force_not_average)
-            print("Updating Max Force: ", max_force)
+            print("max_force_not_average: ", float(max_force_not_average)*22.0462)
+            print("Updating Max Force: ", float(max_force)*22.0462)
             print("Max Force Array", max_force_arr)
             maxValueStr.set("Average Max Force: " + str(abs(round(max_force*22.0462, 3)))) #max_force*22.0462
+            switch.deselect()
         if 0 <= current_progress < 1:
-            print("Max Force", max_force)
+            print("Max Force", max_force*22.0462)
+            print("Target", target*22.0462)
+            print("Target Range", target_range*22.0462)
+            print("Target Percent", find_target_percent)
             if not max_force == 0:
                 progressbar.set(current_progress/0.25)
         target_subtact = target*22.0462 - target_range
