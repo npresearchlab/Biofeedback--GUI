@@ -46,11 +46,11 @@ target_range = target*target_range_percent
 find_target_percent = 0.15
 def button_event(): #entering target, target range, target percent in GUI
     global target, target_range, find_target_percent, target_range_percent
-    target = float(entry_target.get())/22.0462
+    target = float(entry_target.get())
     target_range_percent = float(entry_range.get())
     target_range = target*target_range_percent
     find_target_percent = float(entry_percent.get())
-    targetStr.set("Target: " + str(abs(round(target*22.0462, 3))))
+    targetStr.set("Target: " + str(abs(round(target, 3))))
 label_left.grid(row=1, column=0, pady=10, padx=10)
 entry_target = customtkinter.CTkEntry(master=frame_left, placeholder_text="Target")
 entry_target.grid(row=4, column=0, pady=10, padx=10)
@@ -143,32 +143,32 @@ def arduino_handler():
         print(data)
         current_time = datetime.now()
         current_progress = float(data)
-        displayVar.set("Current Progress: " + str(abs(round(current_progress*22.0462, 3)))) # current_progress*22.0462
+        displayVar.set("Current Progress: " + str(abs(round(current_progress, 3)))) # current_progress*22.0462
         countStr.set("Current Count: " + str(i))
         if i == 0:
-            progressbar.set(current_progress/0.25)
+            progressbar.set((current_progress/22.0462)/0.25)
         if switch.get():
             progressbar.configure(progress_color='#0362fc', height=35)
             print("Time: " + str(time.time()))
             curr_time = time.time()
             target_time = curr_time + 5
             max_force_arr.append(0.0)
-            add_element(csvlist, current_time, round(current_progress*22.0462, 3), round(max_force_not_average*22.0462, 3), round(max_force*22.0462, 3), i, round(target*22.0462, 3), target_range)
+            add_element(csvlist, current_time, round(current_progress, 3), round(max_force_not_average, 3), round(max_force, 3), i, round(target, 3), target_range)
             while curr_time < target_time:
                 curr_time = time.time()
                 data = ArduinoSerial.readline().decode('utf-8').strip()
-                progressbar.set(current_progress/0.25)
+                progressbar.set((current_progress/22.0462)/0.25)
                 print("Current Progress Data: ", data)
                 current_progress = float(data)
                 print("Updating Current Progress", current_progress)
-                displayVar.set("Current Progress: " + str(abs(round(current_progress*22.0462, 3)))) # current_progress*22.0462
+                displayVar.set("Current Progress: " + str(abs(round(current_progress, 3)))) # current_progress*22.0462
                 if current_progress > max_force_arr[i]:
                     current_progress = float(data)
                     max_force_arr[i] = current_progress
                     max_force_not_average = max_force_arr[i]
                     # maxValueStr.set("Max Force: " + str(max_force))
                     if not max_force == 0:
-                        progressbar.set(current_progress/0.25)
+                        progressbar.set((current_progress/22.0462)/0.25)
                         progressbar.configure(progress_color='#0362fc', height=35)
                         turn_blue()
             max_force = 0
@@ -177,33 +177,34 @@ def arduino_handler():
                 print("X", x)
             # max_force_saved.append(max_force_arr[i])
             i+=1
-            print("BEFORE: ",float(max_force)*22.0462)
+            print("BEFORE: ",float(max_force))
             max_force /= i
             target = max_force * find_target_percent
             print("Finding Percent: " + str(find_target_percent))
             print("Target: " + str(target)) # target*22.0462
-            targetStr.set("Target: " + str(abs(round(target*22.0462, 3))))
-            target_range = target*target_range_percent*22.0462
+            targetStr.set("Target: " + str(abs(round(target, 3))))
+            target_range = target*target_range_percent
             rangeStr.set("Target Range: " + str(abs(round(target_range, 3))))
-            print("max_force_not_average: ", float(max_force_not_average)*22.0462)
-            print("Updating Max Force: ", float(max_force)*22.0462)
+            print("max_force_not_average: ", float(max_force_not_average))
+            print("Updating Max Force: ", float(max_force))
             print("Max Force Array", max_force_arr)
-            maxValueStr.set("Average Max Force: " + str(abs(round(max_force*22.0462, 3)))) #max_force*22.0462
+            maxValueStr.set("Average Max Force: " + str(abs(round(max_force, 3)))) #max_force*22.0462
             switch.deselect()
         if 0 <= current_progress < 1:
-            print("Max Force", max_force*22.0462)
-            print("Target", target*22.0462)
-            print("Target Range", target_range*22.0462)
+            print("Max Force", max_force)
+            print("Target", target)
+            print("Target Range", target_range)
             print("Target Percent", find_target_percent)
             if not max_force == 0:
-                progressbar.set(current_progress/0.25)
-        target_subtact = target*22.0462 - target_range
-        target_add = target*22.0462 + target_range
+                progressbar.set((current_progress/22.0462)/0.25)
+        target_subtact = target - target_range
+        target_add = target + target_range
         if not switch.get():
+            progressbar.set((current_progress/22.0462)/0.25)
             data = ArduinoSerial.readline().decode('utf-8').strip()
             current_progress = float(data)
-            displayVar.set("Current Progress: " + str(abs(round(current_progress*22.0462, 3)))) #current_progress*22.0462
-            if target_subtact < current_progress*22.0462 < target_add:
+            displayVar.set("Current Progress: " + str(abs(round(current_progress, 3)))) #current_progress*22.0462
+            if target_subtact < current_progress < target_add:
                 progressbar.configure(progress_color='#2bf09e', height=35)
                 turn_green()
             else:
@@ -213,7 +214,7 @@ def arduino_handler():
             progressbar.configure(progress_color='#0362fc')
         # data_saved.append(current_progress)
         # average_saved.append(max_force)
-        add_element(csvlist, current_time, round(current_progress*22.0462, 3), round(max_force_not_average*22.0462, 3), round(max_force*22.0462, 3), i, round(target*22.0462, 3), target_range)
+        add_element(csvlist, current_time, round(current_progress, 3), round(max_force_not_average, 3), round(max_force, 3), i, round(target, 3), target_range)
         header = ['Current Time', 'Force Exerted', 'Target', 'Target Range', 'Max Forces', 'Average Max Force', 'Number of Trials']
         with open('data_files/current_data.csv', 'w') as f:
             writer = csv.DictWriter(f, fieldnames = header)
