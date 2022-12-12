@@ -148,6 +148,7 @@ def arduino_handler():
         if i == 0:
             progressbar.set((current_progress/22.0462)/0.25)
         if switch.get():
+            turn_blue()
             progressbar.configure(progress_color='#0362fc', height=35)
             print("Time: " + str(time.time()))
             curr_time = time.time()
